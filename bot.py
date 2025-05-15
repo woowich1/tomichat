@@ -69,8 +69,7 @@ def check_in_dscontrol(fio: str) -> bool:
 
     try:
         response = requests.post(DSCONTROL_URL, headers=headers, json=payload)
-        logger.warning(f"[DEBUG] RAW TEXT ОТВЕТА API:
-{response.text}")
+        logger.warning(f"[DEBUG] RAW TEXT ОТВЕТА API:{response.text}")
 
         # Пытаемся разобрать JSON, но вначале проверяем не пусто ли
         if not response.text.strip():
