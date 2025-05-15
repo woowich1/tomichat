@@ -1,6 +1,6 @@
 import logging
-import re
-import requests
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import (
     Application,
@@ -12,15 +12,31 @@ from telegram.ext import (
 )
 
 
+
 BOT_TOKEN = '7634211288:AAF2hG1BQaq_K4iVZM_NcJIkusq3O66MHSA'
-DSCONTROL_API_KEY = '4746eacc66eb4adc8ea22bd321a62a5b'
-DSCONTROL_URL = 'https://app.dscontrol.ru/api'
 INVITE_LINK = 'https://t.me/+GN1Ulgtpy3liNzFi'
 ADMIN_CHAT_ID = 7533995960  # ← вставь свой chat_id
+
 ASK_FIO = 0
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+def get_sheet():
+    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+    client = gspread.authorize(creds)
+    sheet = client.open(SPREADSHEET_NAME).sheet1
+    return sheet
+
+def check_fio_in_sheet(fio: str) -> bool:
+    sheet = get_sheet()
+    fio_list = sheet.col_values(1)
+    fio_cleaned = fio.strip().lower()
+    for row_fio in fio_list:
+        if row_fio.strip().lower() == fio_cleaned:
+            return True
+    return False
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = ReplyKeyboardMarkup([["Стать участником чата"]], one_time_keyboard=True, resize_keyboard=True)
@@ -33,69 +49,26 @@ async def start_registration(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 async def get_fio(update: Update, context: ContextTypes.DEFAULT_TYPE):
     fio = update.message.text.strip()
-
     if len(fio.split()) < 2:
         await update.message.reply_text("⚠️ Пожалуйста, введите как минимум имя и фамилию.")
         return ASK_FIO
 
-    await update.message.reply_text("🔍 Проверяем вас в базе автошколы...")
+    await update.message.reply_text("🔍 Проверяем вас в базе...")
 
     try:
-        if check_in_dscontrol(fio):
+        if check_fio_in_sheet(fio):
             await update.message.reply_text(f"✅ Вы подтверждены! Вот ссылка на чат:{INVITE_LINK}")
         else:
-            await update.message.reply_text("❌ Вы не найдены среди действующих курсантов и выпускников.")
+            await update.message.reply_text("❌ Вы не найдены среди курсантов.")
     except Exception as e:
-        error_text = f"❗️Ошибка проверки:{e}"
-        await update.message.reply_text("⚠️ Возникла внутренняя ошибка. Мы уже разбираемся.")
+        error_text = f"❗️Ошибка доступа к таблице:{e}"
+        await update.message.reply_text("⚠️ Возникла ошибка. Мы уже разбираемся.")
         try:
             await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=error_text)
         except Exception as ex:
-            logger.error(f"Не удалось отправить сообщение админу: {ex}")
+            logger.error(f"Не удалось уведомить администратора: {ex}")
 
     return ConversationHandler.END
-
-def check_in_dscontrol(fio: str) -> bool:
-    payload = {
-        "command": "search",  # строчная команда
-        "search": fio
-    }
-
-    headers = {
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-        'api_key': DSCONTROL_API_KEY,
-    }
-
-    try:
-        response = requests.post(DSCONTROL_URL, headers=headers, json=payload)
-        logger.warning(f"[DEBUG] RAW TEXT ОТВЕТА API:{response.text}")
-
-        # Пытаемся разобрать JSON, но вначале проверяем не пусто ли
-        if not response.text.strip():
-            raise Exception("API вернул пустой ответ")
-
-        data = response.json()
-
-        results = data if isinstance(data, list) else data.get("data", [])
-        if not isinstance(results, list):
-            raise Exception("API вернул некорректный формат данных")
-
-        for item in results:
-            if not isinstance(item, dict):
-                continue
-
-            if item.get("Type", "").lower() == "student":
-                role = item.get("Role") or item.get("role") or item.get("Status") or item.get("status") or ""
-                role = role.lower()
-                if role in ("курсант", "выпускник", "student", "graduate"):
-                    return True
-
-    except Exception as e:
-        logger.error(f"Ошибка API: {e}")
-        raise Exception(f"Ошибка API: {e}")
-
-    return False
 
 def main():
     app = Application.builder().token(BOT_TOKEN).build()
@@ -116,5 +89,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
