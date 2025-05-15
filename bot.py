@@ -1,4 +1,5 @@
 import logging
+import re
 import requests
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import (
@@ -9,6 +10,7 @@ from telegram.ext import (
     ContextTypes,
     filters,
 )
+
 
 BOT_TOKEN = '7634211288:AAF2hG1BQaq_K4iVZM_NcJIkusq3O66MHSA'
 DSCONTROL_API_KEY = '4746eacc66eb4adc8ea22bd321a62a5b'
@@ -35,18 +37,28 @@ async def get_fio(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     fio = context.user_data['fio']
-    phone = update.message.text.strip()
+    phone_input = update.message.text.strip()
+    clean_phone = re.sub(r"\D", "", phone_input)
 
-    if not phone.startswith("+7") or len(phone) < 11:
-        await update.message.reply_text("⚠️ Некорректный формат номера. Введите номер в формате +7XXXXXXXXXX:")
+    if clean_phone.startswith("8"):
+        clean_phone = "7" + clean_phone[1:]
+
+    if not clean_phone.startswith("7") or len(clean_phone) != 11:
+        await update.message.reply_text("⚠️ Неверный формат номера. Введите номер в формате +7XXXXXXXXXX (11 цифр).")
         return ASK_PHONE
 
     await update.message.reply_text("🔍 Проверяем вас в базе автошколы...")
 
-    if check_in_dscontrol(fio, phone):
-        await update.message.reply_text(f"✅ Вы подтверждены! Вот ссылка на чат: {INVITE_LINK}")
-    else:
-        await update.message.reply_text("❌ К сожалению, вы не найдены в базе действующих курсантов и выпускников.")
+    try:
+        if check_in_dscontrol(fio, clean_phone):
+            await update.message.reply_text(f"✅ Вы подтверждены! Вот ссылка на чат:
+{INVITE_LINK}")
+        else:
+            await update.message.reply_text("❌ Вы не найдены среди действующих курсантов и выпускников.")
+    except Exception as e:
+        error_text = f"❗️Ошибка проверки: {e}"
+        await update.message.reply_text("⚠️ Возникла внутренняя ошибка. Мы уже разбираемся.")
+        await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=error_text)
 
     return ConversationHandler.END
 
@@ -59,14 +71,19 @@ def check_in_dscontrol(fio: str, phone: str) -> bool:
     }
 
     try:
-        response = requests.get(DSCONTROL_URL, headers=headers, params={'query': query})
+        response = requests.get(DSCONTROL_URL, headers=headers, params={'search': query})
         data = response.json()
-        for item in data.get("data", []):
-            role = item.get("role", "").lower()
-            if role in ["курсант", "выпускник"]:
-                return True
+        results = data if isinstance(data, list) else data.get("data", [])
+
+        for item in results:
+            if item.get("Type", "").lower() == "student":
+                role = item.get("Role") or item.get("role") or item.get("Status") or item.get("status") or ""
+                role = role.lower()
+                if role in ("курсант", "выпускник", "student", "graduate"):
+                    return True
     except Exception as e:
-        logger.error(f"Ошибка при обращении к API: {e}")
+        logger.error(f"Ошибка API: {e}")
+        raise Exception(f"Ошибка API: {e}")
 
     return False
 
