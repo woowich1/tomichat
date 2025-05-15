@@ -17,8 +17,7 @@ DSCONTROL_API_KEY = '4746eacc66eb4adc8ea22bd321a62a5b'
 DSCONTROL_URL = 'https://app.dscontrol.ru/api/Search'
 INVITE_LINK = 'https://t.me/+GN1Ulgtpy3liNzFi'
 ADMIN_CHAT_ID = 7533995960  # ← вставь свой chat_id
-
-(ASK_FIO, ASK_PHONE) = range(2)
+ASK_FIO = 0
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -33,26 +32,16 @@ async def start_registration(update: Update, context: ContextTypes.DEFAULT_TYPE)
     return ASK_FIO
 
 async def get_fio(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['fio'] = update.message.text.strip()
-    await update.message.reply_text("Теперь введите номер телефона в формате +7XXXXXXXXXX:")
-    return ASK_PHONE
+    fio = update.message.text.strip()
 
-async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    fio = context.user_data['fio']
-    phone_input = update.message.text.strip()
-    clean_phone = re.sub(r"\D", "", phone_input)
-
-    if clean_phone.startswith("8"):
-        clean_phone = "7" + clean_phone[1:]
-
-    if not clean_phone.startswith("7") or len(clean_phone) != 11:
-        await update.message.reply_text("⚠️ Неверный формат номера. Введите номер в формате +7XXXXXXXXXX (11 цифр).")
-        return ASK_PHONE
+    if len(fio.split()) < 2:
+        await update.message.reply_text("⚠️ Пожалуйста, введите как минимум имя и фамилию.")
+        return ASK_FIO
 
     await update.message.reply_text("🔍 Проверяем вас в базе автошколы...")
 
     try:
-        if check_in_dscontrol(fio, clean_phone):
+        if check_in_dscontrol(fio):
             await update.message.reply_text(f"✅ Вы подтверждены! Вот ссылка на чат:{INVITE_LINK}")
         else:
             await update.message.reply_text("❌ Вы не найдены среди действующих курсантов и выпускников.")
@@ -66,8 +55,8 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     return ConversationHandler.END
 
-def check_in_dscontrol(fio: str, phone: str) -> bool:
-    query = f"{fio} {phone}"
+def check_in_dscontrol(fio: str) -> bool:
+    query = fio
     headers = {
         'Content-Type': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
@@ -109,7 +98,6 @@ def main():
         entry_points=[MessageHandler(filters.Regex("^(Стать участником чата)$"), start_registration)],
         states={
             ASK_FIO: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_fio)],
-            ASK_PHONE: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_phone)],
         },
         fallbacks=[CommandHandler("start", start)],
     )
