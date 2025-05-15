@@ -16,6 +16,7 @@ BOT_TOKEN = '7634211288:AAF2hG1BQaq_K4iVZM_NcJIkusq3O66MHSA'
 DSCONTROL_API_KEY = '4746eacc66eb4adc8ea22bd321a62a5b'
 DSCONTROL_URL = 'https://app.dscontrol.ru/api/Search'
 INVITE_LINK = 'https://t.me/+GN1Ulgtpy3liNzFi'
+ADMIN_CHAT_ID = 7533995960  # ← вставь свой chat_id
 
 (ASK_FIO, ASK_PHONE) = range(2)
 
@@ -25,6 +26,8 @@ logger = logging.getLogger(__name__)
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = ReplyKeyboardMarkup([["Стать участником чата"]], one_time_keyboard=True, resize_keyboard=True)
     await update.message.reply_text("👋 Привет! Нажмите кнопку ниже, чтобы подать заявку в чат.", reply_markup=keyboard)
+    # для получения chat_id администратора
+    await update.message.reply_text(f"Ваш chat_id: {update.message.chat_id}")
 
 async def start_registration(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Введите ваше полное ФИО (например: Иванов Иван Иванович):")
@@ -51,13 +54,16 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         if check_in_dscontrol(fio, clean_phone):
-            await update.message.reply_text(f"✅ Вы подтверждены! Вот ссылка на чат: {INVITE_LINK}")
+            await update.message.reply_text(f"✅ Вы подтверждены! Вот ссылка на чат:{INVITE_LINK}")
         else:
             await update.message.reply_text("❌ Вы не найдены среди действующих курсантов и выпускников.")
     except Exception as e:
         error_text = f"❗️Ошибка проверки: {e}"
         await update.message.reply_text("⚠️ Возникла внутренняя ошибка. Мы уже разбираемся.")
-        await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=error_text)
+        try:
+            await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=error_text)
+        except Exception as ex:
+            logger.error(f"Не удалось отправить сообщение админу: {ex}")
 
     return ConversationHandler.END
 
@@ -72,14 +78,22 @@ def check_in_dscontrol(fio: str, phone: str) -> bool:
     try:
         response = requests.get(DSCONTROL_URL, headers=headers, params={'search': query})
         data = response.json()
+
         results = data if isinstance(data, list) else data.get("data", [])
 
+        if not isinstance(results, list):
+            raise Exception("API вернул некорректный формат данных")
+
         for item in results:
+            if not isinstance(item, dict):
+                continue  # пропустить неожиданные типы
+
             if item.get("Type", "").lower() == "student":
                 role = item.get("Role") or item.get("role") or item.get("Status") or item.get("status") or ""
                 role = role.lower()
                 if role in ("курсант", "выпускник", "student", "graduate"):
                     return True
+
     except Exception as e:
         logger.error(f"Ошибка API: {e}")
         raise Exception(f"Ошибка API: {e}")
