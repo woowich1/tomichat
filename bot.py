@@ -51,8 +51,7 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         if check_in_dscontrol(fio, clean_phone):
-            await update.message.reply_text(f"✅ Вы подтверждены! Вот ссылка на чат:
-{INVITE_LINK}")
+            await update.message.reply_text(f"✅ Вы подтверждены! Вот ссылка на чат: {INVITE_LINK}")
         else:
             await update.message.reply_text("❌ Вы не найдены среди действующих курсантов и выпускников.")
     except Exception as e:
