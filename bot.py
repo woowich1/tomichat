@@ -42,13 +42,11 @@ async def get_fio(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         if check_in_dscontrol(fio):
-            await update.message.reply_text(f"✅ Вы подтверждены! Вот ссылка на чат:
-{INVITE_LINK}")
+            await update.message.reply_text(f"✅ Вы подтверждены! Вот ссылка на чат:{INVITE_LINK}")
         else:
             await update.message.reply_text("❌ Вы не найдены среди действующих курсантов и выпускников.")
     except Exception as e:
-        error_text = f"❗️Ошибка проверки:
-{e}"
+        error_text = f"❗️Ошибка проверки:{e}"
         await update.message.reply_text("⚠️ Возникла внутренняя ошибка. Мы уже разбираемся.")
         try:
             await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=error_text)
