@@ -14,7 +14,7 @@ from telegram.ext import (
 
 BOT_TOKEN = '7634211288:AAF2hG1BQaq_K4iVZM_NcJIkusq3O66MHSA'
 DSCONTROL_API_KEY = '4746eacc66eb4adc8ea22bd321a62a5b'
-DSCONTROL_URL = 'https://app.dscontrol.ru/api/Search'
+DSCONTROL_URL = 'https://app.dscontrol.ru/api'
 INVITE_LINK = 'https://t.me/+GN1Ulgtpy3liNzFi'
 ADMIN_CHAT_ID = 7533995960  # ← вставь свой chat_id
 ASK_FIO = 0
