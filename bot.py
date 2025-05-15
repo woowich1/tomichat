@@ -78,8 +78,17 @@ def check_in_dscontrol(fio: str, phone: str) -> bool:
     try:
         response = requests.get(DSCONTROL_URL, headers=headers, params={'search': query})
         data = response.json()
+        logger.warning(f"Ответ API: {data}")
 
         results = data if isinstance(data, list) else data.get("data", [])
+
+if isinstance(data, list):
+    results = data
+elif isinstance(data, dict):
+    results = data.get("data", [])
+else:
+    raise Exception(f"Неизвестный формат ответа: {type(data)}")
+
 
         if not isinstance(results, list):
             raise Exception("API вернул некорректный формат данных")
