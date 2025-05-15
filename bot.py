@@ -26,7 +26,6 @@ logger = logging.getLogger(__name__)
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = ReplyKeyboardMarkup([["Стать участником чата"]], one_time_keyboard=True, resize_keyboard=True)
     await update.message.reply_text("👋 Привет! Нажмите кнопку ниже, чтобы подать заявку в чат.", reply_markup=keyboard)
-    # для получения chat_id администратора
     await update.message.reply_text(f"Ваш chat_id: {update.message.chat_id}")
 
 async def start_registration(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -58,7 +57,7 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await update.message.reply_text("❌ Вы не найдены среди действующих курсантов и выпускников.")
     except Exception as e:
-        error_text = f"❗️Ошибка проверки: {e}"
+        error_text = f"❗️Ошибка проверки:{e}"
         await update.message.reply_text("⚠️ Возникла внутренняя ошибка. Мы уже разбираемся.")
         try:
             await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=error_text)
@@ -78,24 +77,18 @@ def check_in_dscontrol(fio: str, phone: str) -> bool:
     try:
         response = requests.get(DSCONTROL_URL, headers=headers, params={'search': query})
         data = response.json()
-        logger.warning(f"Ответ API: {data}")
+        logger.warning(f"[DEBUG] Ответ API: {data}")
 
-        results = data if isinstance(data, list) else data.get("data", [])
-
-if isinstance(data, list):
-    results = data
-elif isinstance(data, dict):
-    results = data.get("data", [])
-else:
-    raise Exception(f"Неизвестный формат ответа: {type(data)}")
-
-
-        if not isinstance(results, list):
-            raise Exception("API вернул некорректный формат данных")
+        if isinstance(data, list):
+            results = data
+        elif isinstance(data, dict):
+            results = data.get("data", [])
+        else:
+            raise Exception(f"Неизвестный формат ответа: {type(data)}")
 
         for item in results:
             if not isinstance(item, dict):
-                continue  # пропустить неожиданные типы
+                continue
 
             if item.get("Type", "").lower() == "student":
                 role = item.get("Role") or item.get("role") or item.get("Status") or item.get("status") or ""
