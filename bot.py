@@ -42,11 +42,13 @@ async def get_fio(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         if check_in_dscontrol(fio):
-            await update.message.reply_text(f"✅ Вы подтверждены! Вот ссылка на чат:{INVITE_LINK}")
+            await update.message.reply_text(f"✅ Вы подтверждены! Вот ссылка на чат:
+{INVITE_LINK}")
         else:
             await update.message.reply_text("❌ Вы не найдены среди действующих курсантов и выпускников.")
     except Exception as e:
-        error_text = f"❗️Ошибка проверки:{e}"
+        error_text = f"❗️Ошибка проверки:
+{e}"
         await update.message.reply_text("⚠️ Возникла внутренняя ошибка. Мы уже разбираемся.")
         try:
             await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=error_text)
@@ -56,7 +58,11 @@ async def get_fio(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 def check_in_dscontrol(fio: str) -> bool:
-    query = fio
+    payload = {
+        "command": "Search",
+        "search": fio
+    }
+
     headers = {
         'Content-Type': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
@@ -64,7 +70,7 @@ def check_in_dscontrol(fio: str) -> bool:
     }
 
     try:
-        response = requests.get(DSCONTROL_URL, headers=headers, params={'search': query})
+        response = requests.post(DSCONTROL_URL, headers=headers, json=payload)
         data = response.json()
         logger.warning(f"[DEBUG] Ответ API: {data}")
 
@@ -110,3 +116,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
