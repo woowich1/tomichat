@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "autoschooltomich-1696278709922",
+  "private_key_id": "046fbfe50ab1abccba681b18e5731a77bff490fb",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDIprSUXJX4lqYq\n96PdY4/pLWvYC3k/n/7ySvbbEghKBEw4vihKikcxpkpPIAiYlJbCwAbCC2Dr2Sbc\nOXszOvDGqHvG4jz0+4Gzl68XO2RoIKQwHpeA0kl+oB212+GNw7crflVDjjirp8xh\n0GGFmjZrAWBRBcQiFRTGEVXOXXHhBTvU4EXmCivJ8tfqJF4msagD4LmrGHRS40M0\nspVYhhtTLO0UeS1KeX0eslJEzinzIg7ammp9IA7j2S8J7I9OCejs54P2M9K18KOk\nkVeHPT9xa2LovlcXPiLn6/MJwfHRemizoDDA2SOtZor5+D4upfzMetNTLDbnWVUO\nCI4v0y9JAgMBAAECggEALDYBLXx+BfVpvSduCXqly7bYn5SdnW2LPwdR/6CoR2jN\ng6YwmgYAXFn73xXblwUMd/JYOtrHewgQpi8bLIVU5qzagw636DHfmPr31ypcvA3P\nJ5QiBT4wd/BfQ4Ikn3grjK+MKXO1nGr/X2ELD+VUDr1Ro+Cdn/XdqyvIKI2R6Ua5\n6hYe4JE4k3wYAPPP14I/8tjybfy0WNzKtz2STxNsLiJxMLHJFHRqQKwaASwqWbl8\nvl4n+SE7kF0oKh7AuVNMuhXrW8jr+lZZ0YXYNB07l1EjvXtht/e5wwN6URO4N73g\nY85sLikR/5VrSbACt4G5NzeAGd53So3ixHqOmC8SdQKBgQD35xY0zT7llpPgBQTf\nQpRTYtqk6e5LfH4ERJjp2ylpd+VK5A0MzzCah4mQzTCVuglIJ0JBgtlvJ4fuFoyr\nX1kWZYxPpnKNv16XS11XcXjsT+gWHpZAQYrgwv2ITGCbxu35wStxwk1pYINukuU3\n5rNZWFHaLqgFvwVRpMnMCyW3JQKBgQDPNILSdtGAznjh/bBSOTsH0dqDc2Scx2Ub\naPLQK9SPQkh3J+ioipxgf8vFwc4eU+5raWErODk3zn5oMQ6VJrUBXCC5bwAbWtgp\nHV81eEnHd5IKOzh61V+M7TGnfS5lzoTlhOK5LZDDoIjpefZ/QPNdp4PPujZaeQmG\n4/Vm8MngVQKBgQCrrcN5KbKnONKLz64CF4+0977HeqHmcP6sYf0r5vUU701BwhEv\nj8TvH3Irb454AnAvIdEGoWGHUu8V+VPN0qhVlFnJR1IJzD/rsuufhRvjO6tUtjYD\npeBRq3f9DjfRacCguCAoFhGaKpaa2uwW/JO0CjAVUz5VTGaYlfCSeB3UaQKBgQCy\nhCw9xW6kSb7t/VI+1N3d09guLmm9hTC/18Byx4BfWJz0Q+b35kvp+9CE9X9us6MS\n2XyE7vCk+vv/KlzE9c82d7gd6tsttivL6GlRuOvftU2WEQWNFm43DVgdVAV4YuAu\nmjl3jyFM2e97L7/GTSAfTSaL/oO7mNIzbAzOfp9+7QKBgACr2wtwdxdjpyUBhLvJ\nP/aCrD8RbgZwW54ekkvgPb6YrVXbEI1MKXX03bzaLKTr/TV12JJBXjbtNYPJX19l\nEzh1uNQfy4ZrlkhfsJSPhXbR+lPFFp65dKO6qH6DJRw6mMzvp/J9r4CMyU7dbFN0\nYSpEEolmCGVcE037bFLJp4dO\n-----END PRIVATE KEY-----\n",
+  "client_email": "tgbot-166@autoschooltomich-1696278709922.iam.gserviceaccount.com",
+  "client_id": "111363741819341785889",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/tgbot-166%40autoschooltomich-1696278709922.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
