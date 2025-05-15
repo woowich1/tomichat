@@ -57,7 +57,7 @@ async def get_fio(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def check_in_dscontrol(fio: str) -> bool:
     payload = {
-        "command": "Search",
+        "command": "search",  # строчная команда
         "search": fio
     }
 
@@ -69,15 +69,18 @@ def check_in_dscontrol(fio: str) -> bool:
 
     try:
         response = requests.post(DSCONTROL_URL, headers=headers, json=payload)
-        data = response.json()
-        logger.warning(f"[DEBUG] Ответ API: {data}")
+        logger.warning(f"[DEBUG] RAW TEXT ОТВЕТА API:
+{response.text}")
 
-        if isinstance(data, list):
-            results = data
-        elif isinstance(data, dict):
-            results = data.get("data", [])
-        else:
-            raise Exception(f"Неизвестный формат ответа: {type(data)}")
+        # Пытаемся разобрать JSON, но вначале проверяем не пусто ли
+        if not response.text.strip():
+            raise Exception("API вернул пустой ответ")
+
+        data = response.json()
+
+        results = data if isinstance(data, list) else data.get("data", [])
+        if not isinstance(results, list):
+            raise Exception("API вернул некорректный формат данных")
 
         for item in results:
             if not isinstance(item, dict):
@@ -114,4 +117,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
