@@ -44,8 +44,7 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("🔍 Проверяем вас в базе автошколы...")
 
     if check_in_dscontrol(fio, phone):
-        await update.message.reply_text(f"✅ Вы подтверждены! Вот ссылка на чат:
-{INVITE_LINK}")
+        await update.message.reply_text(f"✅ Вы подтверждены! Вот ссылка на чат: {INVITE_LINK}")
     else:
         await update.message.reply_text("❌ К сожалению, вы не найдены в базе действующих курсантов и выпускников.")
 
